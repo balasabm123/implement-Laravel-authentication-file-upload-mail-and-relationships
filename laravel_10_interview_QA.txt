@@ -1,0 +1,719 @@
+
+
+
+# 1. Laravel Request Lifecycle
+
+When a user opens a Laravel URL, the request goes through several steps.
+
+### Flow
+
+1. Request enters `public/index.php`
+2. Composer autoload loads dependencies
+3. Laravel app bootstraps
+4. Service Providers load
+5. Middleware runs
+6. Route matches
+7. Controller method executes
+8. Response returns to browser
+
+### Example
+
+```php
+Route::get('/users', [UserController::class, 'index']);
+```
+
+Request flow:
+
+* `/users` URL called
+* Route matched
+* `UserController@index` runs
+* Data returned as response
+
+---
+
+# 2. Service Providers vs Facades vs Dependency Injection
+
+## Service Providers
+
+Used to register services in Laravel.
+
+### Example
+
+```php
+public function register()
+{
+    $this->app->bind(
+        PaymentService::class,
+        RazorpayService::class
+    );
+}
+```
+
+Used for:
+
+* registering classes
+* bootstrapping app services
+
+---
+
+## Facades
+
+Static-like interface to Laravel services.
+
+### Example
+
+```php
+Cache::put('name', 'John', 60);
+```
+
+Easy to use but hides dependency.
+
+---
+
+## Dependency Injection
+
+Recommended modern approach.
+
+### Example
+
+```php
+class UserController extends Controller
+{
+    public function __construct(UserService $service)
+    {
+        $this->service = $service;
+    }
+}
+```
+
+Benefits:
+
+* cleaner code
+* easier testing
+* loose coupling
+
+---
+
+# 3. IoC Container
+
+Laravel automatically resolves classes.
+
+## Binding
+
+```php
+$this->app->bind(
+    PaymentInterface::class,
+    StripePayment::class
+);
+```
+
+Every time new object created.
+
+---
+
+## Singleton
+
+```php
+$this->app->singleton(
+    PaymentInterface::class,
+    StripePayment::class
+);
+```
+
+Only one instance used everywhere.
+
+---
+
+## Automatic Resolution
+
+```php
+public function index(UserService $service)
+{
+    return $service->getUsers();
+}
+```
+
+Laravel automatically injects `UserService`.
+
+---
+
+# 4. Eloquent Relationships
+
+## hasOne
+
+One user has one profile.
+
+```php
+public function profile()
+{
+    return $this->hasOne(Profile::class);
+}
+```
+
+---
+
+## hasMany
+
+One user has many posts.
+
+```php
+public function posts()
+{
+    return $this->hasMany(Post::class);
+}
+```
+
+---
+
+## belongsTo
+
+Post belongs to user.
+
+```php
+public function user()
+{
+    return $this->belongsTo(User::class);
+}
+```
+
+---
+
+## belongsToMany
+
+Many students belong to many courses.
+
+```php
+public function courses()
+{
+    return $this->belongsToMany(Course::class);
+}
+```
+
+Uses pivot table.
+
+---
+
+## Polymorphic Relationship
+
+Comments can belong to posts or videos.
+
+```php
+public function commentable()
+{
+    return $this->morphTo();
+}
+```
+
+---
+
+## Lazy Loading
+
+```php
+$users = User::all();
+
+foreach($users as $user){
+    echo $user->posts;
+}
+```
+
+Many queries executed.
+
+---
+
+## Eager Loading
+
+```php
+$users = User::with('posts')->get();
+```
+
+Single optimized query.
+
+---
+
+## N+1 Problem
+
+If 100 users exist and each loads posts separately:
+
+* 1 query for users
+* 100 queries for posts
+
+Total = 101 queries
+
+Solved using eager loading.
+
+---
+
+# 5. Middleware
+
+Middleware filters requests.
+
+### Example
+
+Authentication middleware:
+
+```php
+Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    });
+});
+```
+
+---
+
+## Custom Middleware
+
+```bash
+php artisan make:middleware CheckAge
+```
+
+### Middleware Code
+
+```php
+public function handle($request, Closure $next)
+{
+    if ($request->age < 18) {
+        return redirect('home');
+    }
+
+    return $next($request);
+}
+```
+
+Use case:
+
+* authentication
+* role checking
+* logging
+* API security
+
+---
+
+# 6. Authentication & Authorization
+
+## Guards
+
+Defines how users authenticate.
+
+### Example
+
+```php
+'guards' => [
+    'admin' => [
+        'driver' => 'session',
+        'provider' => 'admins',
+    ],
+]
+```
+
+---
+
+## Gates
+
+Simple authorization.
+
+```php
+Gate::define('edit-post', function ($user, $post) {
+    return $user->id == $post->user_id;
+});
+```
+
+---
+
+## Policies
+
+Used for model authorization.
+
+```bash
+php artisan make:policy PostPolicy
+```
+
+```php
+public function update(User $user, Post $post)
+{
+    return $user->id === $post->user_id;
+}
+```
+
+---
+
+## Sanctum vs Passport
+
+### Sanctum
+
+* lightweight
+* SPA/mobile authentication
+* token based
+
+### Passport
+
+* full OAuth2
+* third-party login support
+
+---
+
+# 7. Queues, Jobs & Events
+
+## Job
+
+Task executed in background.
+
+```bash
+php artisan make:job SendEmailJob
+```
+
+```php
+dispatch(new SendEmailJob($user));
+```
+
+---
+
+## Queue
+
+Stores jobs for processing.
+
+Drivers:
+
+* database
+* Redis
+* SQS
+
+---
+
+## Event
+
+Something happened.
+
+```php
+event(new OrderPlaced($order));
+```
+
+---
+
+## Listener
+
+Handles event.
+
+Example:
+
+* send email
+* SMS notification
+
+---
+
+## Failed Jobs
+
+```bash
+php artisan queue:failed
+```
+
+Retry:
+
+```bash
+php artisan queue:retry all
+```
+
+---
+
+# 8. Migrations & Seeders
+
+## Migration
+
+Database version control.
+
+```bash
+php artisan make:migration create_users_table
+```
+
+```php
+Schema::create('users', function (Blueprint $table) {
+    $table->id();
+    $table->string('name');
+});
+```
+
+---
+
+## Seeder
+
+```bash
+php artisan make:seeder UserSeeder
+```
+
+```php
+User::create([
+    'name' => 'John'
+]);
+```
+
+---
+
+## Production Precautions
+
+* backup database
+* test migration first
+* avoid deleting columns directly
+* use maintenance mode
+
+---
+
+# 9. Caching & Performance
+
+## Cache Example
+
+```php
+Cache::put('users', $users, 60);
+```
+
+Get cache:
+
+```php
+Cache::get('users');
+```
+
+---
+
+## Cache Drivers
+
+* file
+* Redis
+* Memcached
+* database
+
+Redis is fastest commonly used.
+
+---
+
+## Performance Optimization
+
+### Use eager loading
+
+```php
+User::with('posts')->get();
+```
+
+### Use queues
+
+Heavy tasks moved to background.
+
+### Use caching
+
+Avoid repeated DB calls.
+
+### Optimize config
+
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan optimize
+```
+
+---
+
+# 10. Real Project Problem Example
+
+## Problem
+
+Website became slow with 50k+ users.
+
+### Issue
+
+N+1 queries and heavy reports.
+
+---
+
+## Solution
+
+### Before
+
+```php
+$users = User::all();
+
+foreach($users as $user){
+    echo $user->posts;
+}
+```
+
+101+ queries.
+
+---
+
+### After
+
+```php
+$users = User::with('posts')->get();
+```
+
+Only 2 queries.
+
+---
+
+## Additional Improvements
+
+* Redis caching
+* queues for emails
+* DB indexing
+* pagination
+
+Result:
+
+* page load reduced from 8 sec to 1.5 sec
+
+---
+
+# Bonus Questions
+
+# Observer
+
+Automatically performs actions on model events.
+
+```php
+User::created(function($user){
+    Mail::to($user)->send(new WelcomeMail());
+});
+```
+
+---
+
+# Repository Pattern
+
+Separates DB logic from controller.
+
+### Bad
+
+```php
+User::where('status',1)->get();
+```
+
+inside controller.
+
+---
+
+### Good
+
+```php
+$userRepository->getActiveUsers();
+```
+
+Cleaner and reusable.
+
+---
+
+# chunk() vs cursor()
+
+## chunk()
+
+Loads data in chunks.
+
+```php
+User::chunk(100, function($users){
+    //
+});
+```
+
+Good for batch processing.
+
+---
+
+## cursor()
+
+Loads one record at a time.
+
+```php
+foreach(User::cursor() as $user){
+    //
+}
+```
+
+Very memory efficient.
+
+---
+
+# API Security
+
+* Sanctum tokens
+* rate limiting
+* validation
+* HTTPS
+* middleware
+
+---
+
+# Rate Limiting
+
+```php
+Route::middleware('throttle:60,1')->group(function () {
+    Route::apiResource('posts', PostController::class);
+});
+```
+
+60 requests per minute.
+
+---
+
+# Multi-Tenancy
+
+Single app for multiple companies/users.
+
+Methods:
+
+* separate databases
+* tenant_id column
+
+Example:
+
+```php
+Post::where('tenant_id', auth()->user()->tenant_id);
+```
+
+---
+
+# Laravel Macros
+
+Add custom methods.
+
+```php
+Response::macro('success', function ($data) {
+    return response()->json([
+        'status' => true,
+        'data' => $data
+    ]);
+});
+```
+
+---
+
+# Broadcasting
+
+Real-time notifications using WebSockets.
+
+Example:
+
+* chat app
+* live notifications
+
+Uses:
+
+* Pusher
+* Laravel Echo
+
+---
+
+# Deployment
+
+Common tools:
+
+* Docker
+* Forge
+* GitHub Actions
+
+### Deployment Steps
+
+```bash
+git pull
+composer install
+php artisan migrate
+php artisan optimize
+```
+
+CI/CD automates deployment process.

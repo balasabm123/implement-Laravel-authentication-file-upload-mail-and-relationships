@@ -1,0 +1,606 @@
+ Laravel Request Lifecycle
+
+When a user opens a Laravel URL, the request goes through several steps.
+
+### Flow
+
+1. Request enters `public/index.php`
+2. Composer autoload loads dependencies
+3. Laravel app bootstraps  
+4. Service Providers load
+5. Middleware runs
+6. Route matches
+7. Controller method executes
+8. Response returns to browser
+
+
+
+Laravel Routing 
+
+->PREFIX ROUTING:
+----------------
+
+Route::Prefix('Student')->group(function (){
+    Route::view('students/home',home);
+    Route::view('students/show',[HomeController::class,'show]);
+})
+
+
+->ROUTE GROUPING WITH CONTROLLER:
+---------------------------------
+
+Route::get('/test',[HomeController::class,'test']);
+Route::get('/add',[HomeController::class,'add']);
+
+Route::controller(HomeController::class)->group(function(){
+Route::get('/test','test');
+Route::get('/add','add');
+});
+
+
+->MIDDLEWARE 
+
+Browser Request -> MIDDLEWARE -> Route / Controller -> Response -> MIDDLEWARE (can modify response) -> Browser 
+
+
+-Global Middleware:
+------------------ 
+
+php artisan make:Middleware AgeCheck
+
+Then go to folder bootstrap ->app.php and configure the Middleware
+
+$Middleware->append(AgeCheck::class)
+
+now apply condition inside Middleware AgeCheck class function
+
+
+-Group Middleware:
+------------------
+
+Here you can create multiple Middleware and make them into group and use as follows
+
+php artisan make:Middleware AgeCheck
+php artisan make:Middleware CountryCheck
+
+Then go to folder bootstrap -> app.php and configure them
+$Middleware->appendToGroup('check1',[
+    AgeCheck::class,
+    CountryCheck::class
+]);
+
+Now apply Middleware group "check1" in web.php Route
+
+Route::get('testhere',[HomeController::class,'get_groupmiddleware'])->middleware('check1');
+
+-Route Middleware:
+-----------------
+
+You can create middleware and directly apply it inside web.php, then apply it to route, also import it.
+
+Route::get('testage', [HomeController::class, 'getdata']) ->middleware(AgeCheck::class); 
+
+
+
+*Eloquent model in Laravel: ”allowing you to work with database records as PHP objects instead of writing raw SQL queries”
+-------------------------
+ORM-Object relational mapper 
+
+It interacts with database table and do all operations , fetch , search, update, delete
+
+Create model Eloquent:
+
+php artisan make:model student -m (This will create model and migrations) 
+
+Inside database/migration add the fields you want in the table 
+        $table->string('name');
+        $table->string('email')->unique();
+        $table->integer('age');
+        $table->string('batch');
+
+inside model add fillables like name , email(table field names)        
+
+php artisan migrate
+
+Eloquent Relationships:
+-----------------------
+
+## hasOne
+
+One user has one profile.
+
+this below function need to create inside model
+```php
+public function profile()
+{
+    return $this->hasOne(Profile::class);
+}
+```
+
+---
+
+hasMany: “Parent owns many children” → hasMany
+--------
+
+One user has many posts.
+
+```php
+public function posts()
+{
+    return $this->hasMany(Post::class);
+}
+consider i have "booking" table then i want to check ->how many booking for perticular user 
+Inside booking Model
+
+   function bookingOneToMany()
+    {
+        return $this->hasMany(booking::class, 'user_id', 'id');
+    }   
+
+Then in controller use like load('booking_one_to_many')
+
+ public function oneToManyList(){
+        $booking = booking::find(1)->load('bookingOneToMany');
+        return $booking;
+    }
+
+O/P:
+
+{
+  "id": 1,
+  "user_id": 2,
+  "app_ref_id": "OrjmTd7dkI",
+  "name": "MSAXeAFCxl",
+  "email": "T42Ei4PoZJ@gmail.com",
+  "phone": "t6uVOyXwme",
+  "created_at": null,
+  "updated_at": null,
+  "booking_one_to_many": [
+    {
+      "id": 4,
+      "user_id": 1,
+      "app_ref_id": "2tELPyx1Hm",
+      "name": "aqU89Atz4k",
+      "email": "6fl4Thfhi6@gmail.com",
+      "phone": "3110509753",
+      "created_at": "2026-06-21T03:22:07.000000Z",
+      "updated_at": "2026-06-21T03:22:07.000000Z"
+    }
+  ]
+}
+
+```
+
+---
+
+belongsTo:“Child belongs to one parent” → belongsTo
+---------
+
+Post belongs to user.
+
+```php
+public function user()
+{
+    return $this->belongsTo(User::class);
+}
+
+consider i have "booking" table then i want to check this booking is belongs to which "user" 
+Inside booking Model
+function booking_user()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+Then in controller use like load('booking_user')
+
+    public function bookingList()
+    {
+        $booking = booking::all()->load('booking_user');  
+    }
+
+O/P:
+ {
+    "id": 1,
+    "user_id": 2,
+    "app_ref_id": "OrjmTd7dkI",
+    "name": "MSAXeAFCxl",
+    "email": "T42Ei4PoZJ@gmail.com",
+    "phone": "t6uVOyXwme",
+    "created_at": null,
+    "updated_at": null,
+    "booking_user": {
+      "id": 2,
+      "name": "Mohank kumar",
+      "email": "mohank222@gmail.com",
+      "email_verified_at": null,
+      "created_at": "2026-06-09T02:03:11.000000Z",
+      "updated_at": null
+    }
+  }        
+
+
+```
+
+---
+
+## belongsToMany
+
+Many students belong to many courses.
+
+```php
+public function courses()
+{
+    return $this->belongsToMany(Course::class);
+}
+```
+
+
+HTTP CLIENT:
+------------- 
+
+Laravel's built-in HTTP client provides a simple and expressive way to make HTTP requests, similar to cURL.
+
+Import the HTTP facade:
+
+use Illuminate\Support\Facades\Http;
+
+Then, within your controller, make a GET request as follows:
+
+$response = Http::get('https://jsonplaceholder.typicode.com/posts');
+
+
+DATABASE QUERY BUILDER :
+------------------------
+It interact with direct database tables
+used with database class ->Facades/DB
+functions that used to crate database QUERY and executes in laravel
+
+Examples:
+use Illuminate\Support\Facades\DB;
+
+function getdatas()
+    { 
+        $dataa = DB::table('users')->insert([
+            "name" => "welcome",
+            "email" => "welcome2220@gmail.com",
+            "password" => "324324234"
+        ]);
+        if ($dataa) {
+            return "Data inserted";
+        } else {
+            return "Data not inserted";
+        }
+        $dataq = DB::table('users')->where('id', 1)->get();
+        $dataq = DB::table('users')->where('id', 7)->delete();
+        $dataq = DB::table('users')->where('id', 3)->update([
+                     "name" => "welcomeback",
+            "email" => "welcomeback213@gmail.com",
+            "password" => "324324234"
+        ]);
+        $data = DB::table('users')->get();
+        return response()->json([
+            'data' => $data,
+            'message' => 'I am at getdatas method of HomeController'
+        ]);
+    }
+
+
+ELOQUENT QUERY BUILDER:
+-----------------------
+It will interact with model class functions
+
+import use App\Models\student;
+
+        $data = student::where('name',"test")->get(); 
+        $data = student::all(); 
+        $data = student::find(2);
+        echo "<pre>";
+        print_r($data); die;
+        $data = student::insert([
+            'name'=>"bala",
+            'email'=>"bala12233@gmail.com",
+            'age'=>30,
+            'batch'=>"20024",
+            ]); */
+        $data = student::all();     
+
+LARAVEL ROUTE METHOD:
+---------------------
+
+ROUTE:get($uri,$callback);
+ROUTE:post($uri,$callback); -> 
+ROUTE:put($uri,$callback); -> like multiple or entire form fields need to update (in the form need to pass text="hidden" name="_method" value="PUT" same for PATCH) 
+ROUTE:patch($uri,$callback); -> Like only single form field need to update
+ROUTE:delete($uri,$callback);
+ROUTE:option($uri,$callback);
+ROUTE:view($uri,$callback);
+
+If you call single controller with multple function (like get/post/put/delete) in that case use ANY
+
+Route::any('user',[HomeController::class,'any']);
+
+If you want to make group of methods like(get,post) and (put,delete) saparate group , that case you can use
+
+Route::match(['get','post'],'user',[HomeController::class,'group1']);
+Route::match(['put','delete'],'user',[HomeController::class,'group2']);
+
+
+LARAVEL HTTP REQUEST CLASS:
+--------------------------
+ 
+When you print function parameter ($request) you will get all the request details like 
+
+$request->method();
+$request->url;
+$request->input('name');
+$request->ip();
+
+
+SESSION:
+-------
+Session is used to store data on server side, which will be accessable to all the pages later.
+
+Normal session store : $request->session()->put('user',$user_details); 
+Display session {{session['session name']}} 
+
+Flash message : $request->session()->flash('message','Login successful');
+Display session {{session['session name']}}
+It is temprory , when you relaod page it will disappear
+
+Destroy session :
+$request->session()->forget('session name'); // remove user session
+$request->session()->flush(); // clear all session data 
+
+
+FILE UPLOAD:
+-----------
+
+In the upload function: 
+$path =$request->file('file')->store('public'); 
+
+Sotarage need to enabled:
+php artisan storage:link
+
+LOCALIZATION:
+------------
+
+It is used to lanaguage change for the website, by default it is disabled need to enable 
+
+php artisan lang:publish
+
+Create hi(hindi) folder 
+lang/hi/messages.php
+
+return [
+    'welcome' => 'स्वागत है',
+];
+
+
+By default you will get english
+
+lang/en/messages.php
+<?php
+
+return [
+    'welcome' => 'Welcome',
+];
+
+In view page {{ __('messages.welcome') }} -> {{__('filename.variable_name')}}
+
+And lastly add .env file "APP_LOCALE=hi"
+
+If you want change lanaguage dynamically :
+-----------------------------------------
+
+1.create session every time, when change lanaguage
+     Route::get('language/{lang}', function ($lang) {
+        session()->put('lang', $lang);
+        return redirect('fileupload');
+    });
+
+2.create middleware "SetLang" 
+ app()->setLocale(session('lang'));
+
+3. Apply this middleware('SetLang') to the route
+
+Route::middleware('SetLang')->group(function () {
+
+        Route::get('language/{lang}', function ($lang) {
+        session()->put('lang', $lang);
+        return redirect('fileupload');
+    });
+});
+
+
+COMPONENTS IN LARAVEL :
+------------------------
+
+1. `php artisan make:component layout` creates:
+
+   * `app/View/Components/Layout.php`
+   * `resources/views/components/layout.blade.php`
+
+2. `<x-layout>` loads `layout.blade.php`.
+
+3. `<x-slot name="title">Home</x-slot>` sends data to `$title`.
+
+4. `<x-slot name="main">...</x-slot>` sends HTML to `$main`.
+
+5. `<x-slot name="login">...</x-slot>` sends HTML to `$login`.
+
+6. In `layout.blade.php`:
+
+```blade
+<title>{{ $title ?? 'Home' }}</title>
+
+<div class="content">
+    {{ $main ?? '' }}
+    {{ $login ?? '' }}
+</div>
+```
+
+7. When Home page loads, only `$main` is filled.
+
+8. When Login page loads, only `$login` is filled.
+
+9. The layout acts like a common template (header + footer + content area).
+
+10. Think of it as:
+
+```blade
+<x-layout>
+    Page Content
+</x-layout>
+```
+
+➡️ Layout = Wrapper
+➡️ Slot = Data/content passed into the wrapper.
+
+layout.blade.php is common page 
+
+1. inside this will pass {{$title}} : $title will come another page "homage.blade.php" 
+
+2.homage.blade.php 
+     <x-layout>
+    <x-slot name="title">Home</x-slot> 
+    </x-layout>
+
+In this way you can change related data dynamically
+
+
+STUB:
+----
+With this you can customise the skeleton controller, model, view
+
+by default its disabled , need to unable using 
+php artisan stub:publish
+
+ex: If you want every controller have index function by default
+    index(REQUEST $req){
+        return "";
+    }
+    When ever you create any controller by default this above function created.
+
+
+
+MIGRATION :
+-----------
+
+php artisan make:migration create_booking_table
+
+migrate : Keeps existing data, only runs new migrations.(php artisan migrate)
+
+Reset: it will remove all the migration from table (php artisan migrate:reset)
+
+rollback : It will remove the recently created migration (php artisan migrate:rollback)
+
+refresh : Run all migrations again from scratch.(php artisan migrate:refresh)
+As a result, all data stored in tables managed by your migrations will be lost
+
+Create Seeder:
+-------------
+php artisan make:seeder bookingSeeder
+
+bookingSeeder.php
+
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
+       \DB::table('booking')->insert([
+            'app_ref_id' => Str::random(10),
+            'name' => Str::random(10),
+            'email' => Str::random(10).'@gmail.com',
+            'phone' => (string) random_int(1000000000, 9999999999),
+            'created_at' => now(),
+            'updated_at' => now(),  
+        ]);
+
+php artisan db:seed --class=bookingSeeder     
+
+Add column to table:
+-------------------
+php artisan make:migration add_user_id_to_bookings_table
+
+    public function up(): void
+    {
+        Schema::table('booking', function (Blueprint $table) {
+            //
+            $table->unsignedBigInteger('user_id')->after('id');
+        });
+    }
+
+Rename Table :
+--------------
+
+php artisan make:migration  rename_booking_table
+
+    public function up(): void
+    {
+        //
+        Schema::rename('booking', 'bookings');
+    }
+
+
+Laravel mentainance mode:
+------------------------
+php artisan down -> temporarly site will show (503 Service Unavailable)
+php artisan up -> again site gets Normal state
+
+ACCESSOR in laravel : 
+----------
+If you want to change table data like name:mayur TO name:Mayur (1st name in capital) -> that you can do in model file
+
+class User extends Model
+{
+    protected function firstName(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => ucfirst($value),
+        );
+    }
+    OR
+    public function getFirstNameAttribute($value)
+    {
+        return ucfirst($value);
+    }
+}
+ 
+ protected function getmobileAttribute($value){
+        return "+91" . $value;
+    } 
+
+MUTATOR in laravel:
+------------------
+If you want to change any information before insert to table like to the column name 
+(1st letter should capital)->that you can do it in model.
+
+class User extends Model
+{
+    protected function firstName(): Attribute
+    {
+        return Attribute::make(
+            set: fn ($value) => strtolower($value),
+        );
+    }
+}
+OR
+
+protected function setNameAttribute($value){
+    $this->attributes['name'] = ucfirst($value);
+} 
+
+
+Facades :
+---------
+
+1.DB
+2.http
+3.email
+
+
+
+
+
+
+
+
+

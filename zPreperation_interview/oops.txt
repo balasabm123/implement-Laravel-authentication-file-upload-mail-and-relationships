@@ -1,0 +1,835 @@
+Here’s an interview-focused explanation of each topic with:
+
+* **Definition**
+* **Why it matters**
+* **Simple example**
+* **Common interview questions**
+* **Best practices / pitfalls**
+
+---
+
+# 1. OOP (Object-Oriented Programming)
+
+## What is OOP?
+
+OOP is a programming paradigm where code is organized around **objects** and **classes**.
+
+A **class** is a blueprint.
+An **object** is an instance of a class.
+
+Main principles:
+
+1. Encapsulation
+2. Inheritance
+3. Polymorphism
+4. Abstraction
+
+---
+
+## Why OOP is used
+
+* Reusable code
+* Better organization
+* Easier maintenance
+* Scalable applications
+* Real-world modeling
+
+---
+
+## Example
+
+```php
+class Car {
+    public $brand;
+
+    public function start() {
+        return "Car started";
+    }
+}
+
+$car = new Car();
+$car->brand = "Toyota";
+
+echo $car->start();
+```
+
+---
+
+## Core Concepts
+
+## 1. Encapsulation
+
+Binding data + methods together and restricting direct access.
+
+```php
+class User {
+    private $password;
+
+    public function setPassword($password) {
+        $this->password = password_hash($password, PASSWORD_DEFAULT);
+    }
+}
+```
+
+### Interview Point
+
+* `private` → accessible only inside class
+* `protected` → inside class + child class
+* `public` → everywhere
+
+---
+
+## 2. Inheritance
+
+```php
+class Animal {
+    public function sound() {
+        return "Some sound";
+    }
+}
+
+class Dog extends Animal {
+    public function bark() {
+        return "Bark";
+    }
+}
+```
+
+### Why use inheritance?
+
+* Reuse common logic
+* Reduce duplication
+
+---
+
+## 3. Polymorphism
+
+Same method behaves differently.
+
+```php
+class Animal {
+    public function sound() {}
+}
+
+class Dog extends Animal {
+    public function sound() {
+        return "Bark";
+    }
+}
+
+class Cat extends Animal {
+    public function sound() {
+        return "Meow";
+    }
+}
+```
+
+---
+
+## 4. Abstraction
+
+Hide implementation details and expose essentials.
+
+Achieved using:
+
+* Abstract classes
+* Interfaces
+
+---
+
+# Common OOP Interview Questions
+
+## Q1. Difference between class and object?
+
+| Class          | Object          |
+| -------------- | --------------- |
+| Blueprint      | Instance        |
+| Logical entity | Physical entity |
+
+---
+
+## Q2. What is constructor?
+
+```php
+public function __construct() {
+    echo "Object created";
+}
+```
+
+Automatically called when object is created.
+
+---
+
+## Q3. What is method overloading in PHP?
+
+PHP does not support traditional overloading directly.
+Magic methods like `__call()` are used.
+
+---
+
+# 2. Traits
+
+## What are Traits?
+
+Traits allow **code reuse** in multiple classes.
+
+PHP supports single inheritance only, so traits help share methods.
+
+---
+
+## Example
+
+```php
+trait Logger {
+    public function log($msg) {
+        echo $msg;
+    }
+}
+
+class User {
+    use Logger;
+}
+
+class Product {
+    use Logger;
+}
+```
+
+---
+
+## Why Traits?
+
+* Avoid duplicate code
+* Reuse functionality across unrelated classes
+
+---
+
+## Trait vs Inheritance
+
+| Trait                    | Inheritance               |
+| ------------------------ | ------------------------- |
+| Reuse methods            | Parent-child relationship |
+| Multiple traits possible | Single inheritance        |
+
+---
+
+## Interview Questions
+
+### Q1. Can traits have properties?
+
+Yes.
+
+```php
+trait Test {
+    public $name;
+}
+```
+
+---
+
+### Q2. Can traits have constructors?
+
+Yes.
+
+---
+
+### Q3. Trait vs Interface?
+
+Trait provides implementation.
+Interface provides contract only.
+
+---
+
+# 3. Interfaces
+
+## What is an Interface?
+
+Defines a **contract** that classes must implement.
+
+---
+
+## Example
+
+```php
+interface PaymentGateway {
+    public function pay($amount);
+}
+
+class StripePayment implements PaymentGateway {
+    public function pay($amount) {
+        return "Paid using Stripe";
+    }
+}
+```
+
+---
+
+## Why Interfaces?
+
+* Standardization
+* Loose coupling
+* Easier testing
+* Better architecture
+
+---
+
+## Important Rules
+
+* Methods are public by default
+* Cannot contain method implementation (except default methods in newer languages—not PHP traditionally)
+* Class can implement multiple interfaces
+
+---
+
+## Interview Questions
+
+### Q1. Interface vs Abstract Class?
+
+| Interface                   | Abstract Class         |
+| --------------------------- | ---------------------- |
+| Only contract               | Partial implementation |
+| Multiple allowed            | Single inheritance     |
+| No properties traditionally | Can have properties    |
+
+---
+
+### Q2. Why use interfaces?
+
+For flexibility and dependency inversion.
+
+---
+
+# 4. Abstract Classes
+
+## What is an Abstract Class?
+
+A class that cannot be instantiated directly.
+
+Used when some methods are common and some must be implemented by child classes.
+
+---
+
+## Example
+
+```php
+abstract class Animal {
+    abstract public function sound();
+
+    public function sleep() {
+        return "Sleeping";
+    }
+}
+
+class Dog extends Animal {
+    public function sound() {
+        return "Bark";
+    }
+}
+```
+
+---
+
+## Why use abstract classes?
+
+* Share common code
+* Force child classes to implement required methods
+
+---
+
+## Abstract Class vs Interface
+
+| Abstract Class          | Interface                    |
+| ----------------------- | ---------------------------- |
+| Can have implementation | Usually contract only        |
+| Can have properties     | Constants only traditionally |
+| Single inheritance      | Multiple interfaces          |
+
+---
+
+# 5. Dependency Injection (DI)
+
+## What is Dependency Injection?
+
+Providing dependencies from outside instead of creating them inside the class.
+
+---
+
+## Without DI (Bad)
+
+```php
+class UserService {
+    private $db;
+
+    public function __construct() {
+        $this->db = new MySQLDatabase();
+    }
+}
+```
+
+Problem:
+
+* Tight coupling
+* Hard to test
+
+---
+
+## With DI (Good)
+
+```php
+class UserService {
+    private $db;
+
+    public function __construct(Database $db) {
+        $this->db = $db;
+    }
+}
+```
+
+Usage:
+
+```php
+$db = new MySQLDatabase();
+$userService = new UserService($db);
+```
+
+---
+
+## Types of DI
+
+### 1. Constructor Injection
+
+Most common.
+
+### 2. Setter Injection
+
+```php
+public function setDB(Database $db) {
+    $this->db = $db;
+}
+```
+
+### 3. Method Injection
+
+```php
+public function save(Database $db) {}
+```
+
+---
+
+## Benefits
+
+* Loose coupling
+* Easier unit testing
+* Better maintainability
+* Flexible architecture
+
+---
+
+## Interview Questions
+
+### Q1. What problem does DI solve?
+
+Tight coupling.
+
+---
+
+### Q2. What is IoC (Inversion of Control)?
+
+Control of object creation is transferred to container/framework.
+
+---
+
+### Q3. What is a Service Container?
+
+A container that manages dependencies automatically.
+
+Common in:
+
+* Laravel
+* Symfony
+
+---
+
+# 6. Composer
+
+## What is Composer?
+
+PHP dependency manager.
+
+Used to:
+
+* Install packages
+* Manage libraries
+* Autoload classes
+
+---
+
+## Important Commands
+
+## Install Composer dependencies
+
+```bash
+composer install
+```
+
+---
+
+## Add package
+
+```bash
+composer require monolog/monolog
+```
+
+---
+
+## Update packages
+
+```bash
+composer update
+```
+
+---
+
+## Autoload
+
+```bash
+composer dump-autoload
+```
+
+---
+
+## composer.json Example
+
+```json
+{
+    "require": {
+        "monolog/monolog": "^3.0"
+    }
+}
+```
+
+---
+
+## Why Composer Matters
+
+* Dependency management
+* PSR-4 autoloading
+* Package ecosystem
+
+---
+
+## Interview Questions
+
+### Q1. Difference between install and update?
+
+| install            | update           |
+| ------------------ | ---------------- |
+| Uses composer.lock | Updates versions |
+
+---
+
+### Q2. What is vendor folder?
+
+Contains installed packages.
+
+---
+
+### Q3. What is composer.lock?
+
+Locks exact package versions.
+
+---
+
+# 7. Namespaces
+
+## What are Namespaces?
+
+Used to avoid class name conflicts.
+
+---
+
+## Without Namespace Problem
+
+```php
+class User {}
+class User {}
+```
+
+Conflict occurs.
+
+---
+
+## With Namespace
+
+```php
+namespace App\Models;
+
+class User {}
+```
+
+Usage:
+
+```php
+use App\Models\User;
+```
+
+---
+
+## Why Namespaces?
+
+* Organize code
+* Prevent naming collisions
+* Better modularity
+
+---
+
+## Interview Questions
+
+### Q1. Difference between include and use?
+
+* `include` loads file
+* `use` imports namespace/class
+
+---
+
+### Q2. What is fully qualified namespace?
+
+```php
+\App\Models\User
+```
+
+Starts from root namespace.
+
+---
+
+# 8. PSR Standards
+
+## What is PSR?
+
+PHP Standards Recommendation.
+
+Created by:
+PHP-FIG
+
+Purpose:
+
+* Standardize PHP development
+* Improve interoperability
+
+---
+
+# Important PSRs for Interviews
+
+---
+
+# PSR-1 (Basic Coding Standard)
+
+Rules:
+
+* PHP tags
+* Class naming
+* Method naming
+
+---
+
+# PSR-4 (Autoloading)
+
+Maps namespaces to directories.
+
+Example:
+
+```json
+"autoload": {
+    "psr-4": {
+        "App\\": "app/"
+    }
+}
+```
+
+---
+
+## Folder Structure
+
+```text
+app/
+ └── Models/
+      └── User.php
+```
+
+```php
+namespace App\Models;
+
+class User {}
+```
+
+Composer autoloads automatically.
+
+---
+
+# PSR-12 (Coding Style)
+
+Defines coding style:
+
+* Indentation
+* Braces
+* Line length
+* Formatting
+
+---
+
+# PSR-3 (Logger Interface)
+
+Standard logging interface.
+
+```php
+logger->info("message");
+```
+
+---
+
+# PSR-7
+
+HTTP message interfaces.
+
+Used in:
+
+* APIs
+* Middleware
+
+---
+
+# Common Interview Questions
+
+## Q1. Why PSR standards important?
+
+* Consistency
+* Team collaboration
+* Framework interoperability
+
+---
+
+## Q2. Explain PSR-4.
+
+Autoloading standard mapping namespaces to directory paths.
+
+---
+
+# Important Interview Comparisons
+
+# Trait vs Interface vs Abstract Class
+
+| Feature               | Trait      | Interface        | Abstract Class |
+| --------------------- | ---------- | ---------------- | -------------- |
+| Method implementation | Yes        | No               | Yes            |
+| Multiple use          | Yes        | Yes              | No             |
+| Properties            | Yes        | No traditionally | Yes            |
+| Constructor           | Yes        | No               | Yes            |
+| Purpose               | Code reuse | Contract         | Base behavior  |
+
+---
+
+# Real-World Architecture Example
+
+```text
+Controller
+   ↓
+Service
+   ↓
+Repository
+   ↓
+Database
+```
+
+Used with:
+
+* Interfaces
+* Dependency Injection
+* PSR standards
+* Composer autoloading
+
+---
+
+# Most Asked Practical Interview Questions
+
+## 1. Why prefer composition over inheritance?
+
+Composition is more flexible and loosely coupled.
+
+---
+
+## 2. What is SOLID?
+
+Five design principles:
+
+* S → Single Responsibility
+* O → Open/Closed
+* L → Liskov Substitution
+* I → Interface Segregation
+* D → Dependency Inversion
+
+---
+
+## 3. What is tight coupling?
+
+Classes heavily dependent on each other.
+
+---
+
+## 4. Why use interfaces in Laravel/Symfony?
+
+For abstraction and easier swapping/testing of implementations.
+
+---
+
+# Interview Preparation Tips
+
+## Focus on:
+
+* Real examples
+* Practical use cases
+* Differences between concepts
+* SOLID principles
+* DI + Interfaces
+* PSR-4 autoloading
+* Composer workflow
+
+---
+
+# Quick Revision Notes
+
+| Topic          | Key Point              |
+| -------------- | ---------------------- |
+| OOP            | Objects and classes    |
+| Trait          | Code reuse             |
+| Interface      | Contract               |
+| Abstract Class | Partial implementation |
+| DI             | Inject dependencies    |
+| Composer       | Dependency manager     |
+| Namespace      | Avoid conflicts        |
+| PSR            | Coding standards       |
+
+---
+
+# Mini Mock Interview
+
+## Q: Why use Dependency Injection with interfaces?
+
+Answer:
+
+> It reduces tight coupling, improves flexibility, and makes unit testing easier because implementations can be swapped without changing dependent code.
+
+---
+
+## Q: When would you choose abstract class over interface?
+
+Answer:
+
+> When classes share common behavior and state, not just a contract.
+
+---
+
+## Q: Why are traits useful in PHP?
+
+Answer:
+
+> PHP supports single inheritance, so traits help reuse methods across multiple unrelated classes.

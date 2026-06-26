@@ -1,0 +1,168 @@
+https://chatgpt.com/s/t_6a17bca4da908191b5f6a50747d75069
+Here’s a simple example of a custom payment gateway service provider in Laravel 12.
+
+## 1. Create Provider
+
+```bash id="z7a1qp"
+php artisan make:provider PaymentGatewayServiceProvider
+```
+
+---
+
+## 2. Create Payment Service
+
+Create file:
+
+```bash id="u3k1vx"
+app/Services/PaymentGateway.php
+```
+
+Add this code:
+
+```php id="f2m9wr"
+<?php
+
+namespace App\Services;
+
+class PaymentGateway
+{
+    protected string $apiKey;
+
+    public function __construct()
+    {
+        $this->apiKey = config('services.payment.api_key');
+    }
+
+    public function charge($amount)
+    {
+        return "Charging ₹{$amount} using API Key: {$this->apiKey}";
+    }
+}
+```
+
+---
+
+## 3. Configure Service Provider
+
+Open:
+
+```bash id="b7n2qy"
+app/Providers/PaymentGatewayServiceProvider.php
+```
+
+Replace code with:
+
+```php id="g5d8lm"
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use App\Services\PaymentGateway;
+
+class PaymentGatewayServiceProvider extends ServiceProvider
+{
+    /**
+     * Register services.
+     */
+    public function register(): void
+    {
+        $this->app->singleton(PaymentGateway::class, function ($app) {
+            return new PaymentGateway();
+        });
+    }
+
+    /**
+     * Bootstrap services.
+     */
+    public function boot(): void
+    {
+        //
+    }
+}
+```
+
+---
+
+## 4. Add Config in `.env`
+
+```env id="s1j7hk"
+PAYMENT_API_KEY=pk_test_123456
+```
+
+---
+
+## 5. Add in `config/services.php`
+
+```php id="n8x3qa"
+'payment' => [
+    'api_key' => env('PAYMENT_API_KEY'),
+],
+```
+
+---
+
+## 6. Register Provider (Optional in Laravel 12)
+
+If auto-discovery is not working, add provider in:
+
+```php id="r6c9vw"
+bootstrap/providers.php
+```
+
+```php id="y4m2ke"
+return [
+    App\Providers\PaymentGatewayServiceProvider::class,
+];
+```
+
+---
+
+## 7. Use in Controller
+
+Example controller:
+
+```php id="e9t5pb"
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Services\PaymentGateway;
+
+class PaymentController extends Controller
+{
+    public function pay(PaymentGateway $paymentGateway)
+    {
+        return $paymentGateway->charge(500);
+    }
+}
+```
+
+---
+
+## 8. Route Example
+
+```php id="p4v8zn"
+use App\Http\Controllers\PaymentController;
+
+Route::get('/pay', [PaymentController::class, 'pay']);
+```
+
+Visiting:
+
+```bash id="q7f2ls"
+/pay
+```
+
+would return:
+
+```bash id="h6k1md"
+Charging ₹500 using API Key: pk_test_123456
+```
+
+This demonstrates:
+
+* Service Container
+* Dependency Injection
+* Service Provider
+* Custom payment service structure in Laravel 12
