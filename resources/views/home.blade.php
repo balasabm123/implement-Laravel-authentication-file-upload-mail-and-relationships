@@ -120,7 +120,7 @@
             📁 File Upload & Language
         </a>
 
-        <a href="{{ route('loginsession') }}">
+        <a href="{{ route('lg-in') }}">
             🔐 Login & Session
         </a>
 

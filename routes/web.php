@@ -3,7 +3,7 @@
 // feat: implement Laravel CRUD, authentication, file upload, mail, and relationships
 // Laravel+react : https://youtu.be/1Vj73iP_7vk
 // Laravel 12 tutorial : https://youtu.be/0M84Nk7iWkA?list=PLLQuc_7jk__W2rpfMsXiOiRn_THCD2R0U
-// 4:00 time routes
+// https://chatgpt.com/s/t_6a4330a73a7081919d08fc16bfa6bcb9 -JWT token and laravel 12 
 use App\Http\Controllers\bookingController;
  use App\Http\Controllers\EmployeeController;
  use App\Http\Controllers\extendFiles;
@@ -67,8 +67,8 @@ Route::get('getdata', [HomeController::class, 'getdatas']);
 
 Route::view('login','liginSession')->name('loginsession');
 Route::view('sessionProfile','sessionProfile');
-
-Route::post('login',[SessionUser::class,'login']);
+Route::view('lg-in','login')->name('lg-in');
+Route::post('login',[SessionUser::class,'login'])->name('login');
  
 Route::post('logout',[SessionUser::class,'logout']);
 

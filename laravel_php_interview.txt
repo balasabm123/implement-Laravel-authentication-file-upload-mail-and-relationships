@@ -1,0 +1,366 @@
+========================================
+PHP + LARAVEL INTERVIEW PREPARATION NOTES
+(DAY 1 - DAY 6 COMPLETE REVISION)
+========================================
+
+
+========================================
+DAY 1 - PHP BASIC CONCEPTS
+========================================
+
+1. GET vs POST
+GET:
+- Data in URL
+- Less secure
+- Can be bookmarked
+
+POST:
+- Data in body
+- More secure
+- Used for sensitive data
+
+Example:
+$id = $_GET['id'];
+$name = $_POST['name'];
+
+----------------------------------------
+
+2. Session vs Cookie
+
+Session:
+- Stored on server
+- More secure
+
+Cookie:
+- Stored in browser
+- Less secure
+
+session_start();
+$_SESSION['user'] = "John";
+
+setcookie("user", "John", time()+3600);
+
+----------------------------------------
+
+3. Include vs Require
+
+include:
+- Warning if file missing
+- Script continues
+
+require:
+- Fatal error if file missing
+- Script stops
+
+include 'file.php';
+require 'file.php';
+
+----------------------------------------
+
+4. Echo vs Print
+
+echo:
+- Faster
+- No return value
+
+print:
+- Returns 1
+
+echo "Hello";
+print "Hello";
+
+----------------------------------------
+
+5. Variable Scope
+- Local
+- Global
+- Static
+
+global $x;
+
+----------------------------------------
+
+6. OOP Pillars
+- Encapsulation
+- Inheritance
+- Polymorphism
+- Abstraction
+
+----------------------------------------
+
+7. Class & Object
+
+class User {
+  public $name;
+}
+
+$user = new User();
+
+----------------------------------------
+
+8. Constructor
+
+function __construct(){
+  echo "Object Created";
+}
+
+----------------------------------------
+
+9. Inheritance
+
+class Animal {
+  function sound(){
+    echo "Sound";
+  }
+}
+
+class Dog extends Animal {}
+
+----------------------------------------
+
+10. Abstract vs Interface
+
+Abstract:
+- Can have methods
+- Can have properties
+
+Interface:
+- Only method declarations
+
+========================================
+DAY 2 - FUNCTIONS, ARRAYS, STRINGS
+========================================
+
+1. Function
+function greet($name){
+  return $name;
+}
+
+----------------------------------------
+
+2. Default Argument
+function add($a, $b=10){}
+
+----------------------------------------
+
+3. Pass by Value / Reference
+function test(&$x){}
+
+----------------------------------------
+
+4. Arrays
+
+Indexed:
+$a = [1,2,3];
+
+Associative:
+$a = ["name"=>"John"];
+
+----------------------------------------
+
+5. Multidimensional Array
+$data = [
+ ["id"=>1],
+ ["id"=>2]
+];
+
+----------------------------------------
+
+6. String Functions
+strlen()
+trim()
+strtoupper()
+strtolower()
+substr()
+
+----------------------------------------
+
+7. implode vs explode
+implode(",", $arr);
+explode(",", $str);
+
+----------------------------------------
+
+8. strlen vs mb_strlen
+strlen = bytes
+mb_strlen = characters
+
+----------------------------------------
+
+9. isset vs empty
+isset → variable exists
+empty → checks if empty
+
+----------------------------------------
+
+10. foreach vs for
+
+foreach ($arr as $v)
+for ($i=0; $i<count($arr); $i++)
+
+========================================
+DAY 3 - REAL WORLD PHP
+========================================
+
+1. Session vs Cookie (same concept)
+
+2. File Handling
+fopen()
+fread()
+fwrite()
+fclose()
+
+3. Exception Handling
+try {} catch {} throw
+
+4. Form Validation
+check empty, length, format
+
+5. PDO vs MySQLi
+PDO → multiple DB
+MySQLi → only MySQL
+
+6. Prepared Statements
+Prevents SQL injection
+
+7. CRUD
+Create Read Update Delete
+
+8. Error Reporting
+error_reporting(E_ALL);
+
+9. Security Best Practices
+- validate input
+- use prepared statements
+- password_hash()
+- HTTPS
+
+10. MVC
+Model - View - Controller
+
+========================================
+DAY 4 - DATABASE & ADVANCED PHP
+========================================
+
+1. PDO Prepared Statements
+Prevent SQL injection
+
+2. SQL Injection
+Malicious SQL input attack
+
+3. JOINs
+- INNER
+- LEFT
+- RIGHT
+
+4. Transactions
+beginTransaction()
+commit()
+rollBack()
+
+5. ACID
+A - Atomicity
+C - Consistency
+I - Isolation
+D - Durability
+
+6. Indexing
+Speeds up DB queries
+
+7. Normalization
+1NF, 2NF, 3NF, BCNF
+
+8. Traits
+Code reuse in PHP
+
+9. Namespace
+Avoid class conflicts
+
+10. Autoloading
+spl_autoload_register()
+
+========================================
+DAY 5 - LARAVEL BASICS
+========================================
+
+1. Laravel
+PHP MVC framework
+
+2. MVC
+Model View Controller
+
+3. Routing
+Route::get('/users')
+
+4. Middleware
+Request filter
+
+5. Migration
+DB version control
+
+6. Seeder
+Dummy data
+
+7. Eloquent ORM
+Model based DB
+
+8. Blade
+Laravel templating engine
+
+9. Artisan
+CLI tool
+
+10. Service Container
+Dependency injection
+
+========================================
+DAY 6 - ADVANCED LARAVEL
+========================================
+
+1. Eloquent Relationships
+hasMany, belongsTo
+
+2. Authentication
+Auth::attempt()
+
+3. Sanctum
+API authentication
+
+4. Passport
+OAuth authentication
+
+5. Middleware
+Request filtering layer
+
+6. Form Request Validation
+Separate validation class
+
+7. Events & Listeners
+Decoupled architecture
+
+8. Queues
+Background tasks
+
+9. Jobs
+Queue tasks
+
+10. Caching
+Cache::put(), Cache::get()
+
+========================================
+FINAL KEY TAKEAWAYS
+========================================
+
+- Practice daily
+- Understand concepts clearly
+- Write code examples
+- Revise OOP regularly
+- Master Laravel basics
+- Learn database concepts deeply
+
+========================================
+QUOTE
+========================================
+
+"Small progress every day leads to big success"
+"Master fundamentals → Build strong applications"

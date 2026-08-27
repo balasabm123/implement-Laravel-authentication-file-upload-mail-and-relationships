@@ -589,14 +589,121 @@ protected function setNameAttribute($value){
 } 
 
 
-Facades :
+Facades : These are the classes with this class will perform set of pre defined function
+Facades are They allow you to call methods without manually creating an instance of the underlying class.
 ---------
+use Illuminate\Support\Facades
 
-1.DB
-2.http
-3.email
+1.DB -> DB::table('users')->get();
+
+2.Http -> Http::get('https://example.com');
+
+3.Mail-> Mail::to($user)->send(new WelcomeMail());
+
+4.Blade-> Blade::render('Hello, {{ $name }}', ['name' => 'John']);
+
+5.Validator->Validator::make($data, ['email' => 'required|email',]);
+
+6.Hash -> Hash::check($request->password, $user->password)
+
+7.Cookie-> Cookie::queue('username','John',60)
+
+8.Session-> Session::put('username','Mohan kumar');
 
 
+
+
+
+Inline Blade Template: without creating blade file you can print and even pass variables to.(I code or o/p is too short use this)
+----------------------
+
+import 
+use Illuminate\Support\Facades\Blade;
+
+function productList(){ 
+    $productlist = 20;
+    return Blade::render('<h1>{{$total}} Products available </h1>',['total'=>$productlist]);
+}
+
+
+API in laravel :
+----------------
+
+php artisan install:API
+
+End url : http://127.0.0.1:8000/api/employee -> get employee list , like wise CRUD so..on.
+
+php artisan make:controller manageController--resourece : then you will get all CRUD function already created.
+
+Rout: Route::resource('manage',[manageController::class]); -> it works according to GET,POST,PUT,DELETE.
+
+End url : http://127.0.0.1:8000/api/manage -> it works according to GET,POST,PUT,DELETE
+
+
+Sanctum Authentication(Login with laravel sanctum) :
+---------------------------------------------------
+
+When you give command  -> php artisan install:api  , it install sanctum and ask for migration 
+
+1.Create userAuthController, add signUp, login functions
+
+2.User model,  add  use HasApiTokens and import
+
+3.userAuthController
+
+public  function signUp(Request $req){ 
+        $input=$req->All();
+        $input['password'] = bcrypt($input['password']); 
+        $user = User::create($input);
+        $success['Token'] = $user->createToken('myapp')->plainTextToken;
+        $user['name']= $user->name;
+        return ['success'=>true,'result'=>$success,"msg"=>"User Registered Successfully"];
+    }
+
+    After registration allow gets logged in as you sending the token in response.
+4.Login 
+
+public function login(Request $request)
+    {
+        $user = User::where('email', $request->email)->first();
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return ['result' => "User not found; Either username or password incorrect ", 'success' => false];
+        }
+
+        $success['Token'] = $user->createToken('myapp')->plainTextToken;
+        $user['name'] = $user->name;
+        return ['success' => true, 'result' => $success, "msg" => "User Registered Successfully"];
+    }
+
+ 5.API authentication with Laravel Sanctum
+
+  {
+        $user = User::where('email', $request->email)->first();
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return ['result' => "User not found; Either username or password incorrect ", 'success' => false];
+        }
+
+        $success['Token'] = $user->createToken('myapp')->plainTextToken;
+        $user['name'] = $user->name;
+        return ['success' => true, 'result' => $success, "msg" => "User Registered Successfully"];
+    }
+
+6.Apply Middleware
+   Route::group(['middleware'=>"auth:sanctum"],function(){ 
+    Route::get('/employee',[employeeController::class,'index']); 
+});   
+
+7. Add exception in bootstrap/app.php
+    ->withExceptions(function (Exceptions $exceptions): void {
+        //
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Unauthorized. Please login first.',
+            ], 401);
+        });
+
+    })->create();
 
 
 
